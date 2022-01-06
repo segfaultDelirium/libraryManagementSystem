@@ -1,0 +1,10 @@
+{% extends './base.html' %}
+
+{% block content %}
+you are viewing countries:
+<ul>
+    {% for country in countries %}
+        <li>{{ country }}</li>
+    {% endfor %}
+</ul>
+{% endblock content %}
