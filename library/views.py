@@ -14,7 +14,7 @@ import psycopg2
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+    return HttpResponse("Hello, world. You're at the library index.")
 
 def v1(request):
     return HttpResponse("view 1")
