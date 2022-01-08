@@ -4,10 +4,11 @@
     <div class="main">
         {% include './navbar.html' %}
         <div>
-            <div >you are viewing countries:
-                <ul>
-                    {% for country in countries %}
-                        <li>{{ country }}</li>
+            <div >you are viewing books:
+                <span>categories:</span>
+                <ul class="category-list">
+                    {% for category in categories %}
+                        <li>{{ category }}</li>
                     {% endfor %}
                 </ul>
             </div>

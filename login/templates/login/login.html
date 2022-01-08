@@ -1,19 +1,23 @@
 {%  extends "library/base.html" %}
 
 {% block title %}
-    log in
 {% endblock %}
 
 {% block content %}
-    <form method="POST" class="form-group">
-        {% csrf_token %}
-        {{ form }}
-        <button type="submit" class="btn btn-success">Login</button>
-    </form>
-    <ul class="error-message-list">
-        {% for errorMessage in errorMessages %}
-            <li class="error-message">{{ errorMessage }}</li>
-        {% endfor %}
-    </ul>
+    <div class="login-form-container">
+        <form method="POST" class="form-group login-form" >
+            {% csrf_token %}
+            {{ form }}
+            <button type="submit" class="btn btn-success">Login</button>
+        </form>
+        <ul class="error-message-list">
+            {% for errorMessage in errorMessages %}
+                <li class="error-message">{{ errorMessage }}</li>
+            {% endfor %}
+        </ul>
+        <a href="../register/">create account</a>
+    </div>
+
+
 
 {% endblock %}

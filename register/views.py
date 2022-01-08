@@ -1,10 +1,12 @@
 from django.http import HttpResponse
 from django.template import loader
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 
 import psycopg2
+
+from register.forms import RegisterForm
 
 # Create your views here.
 def register(request):
@@ -17,7 +19,7 @@ def register(request):
 
     # print(request.session)
     # print(request.session['user_login'])
-    form = UserCreationForm()
+    form = RegisterForm()
     context = {'form': form}
     if request.method == 'POST':
         requestData = request.POST
@@ -64,7 +66,7 @@ def register(request):
             return HttpResponse(template.render(context, request))
         # print(f'insert into public.uzytkownik (login, haslo) values (\'{username}\', \'{password1}\')')
         # cursor.execute(f'insert into public.uzytkownik (login, haslo) values (\'{username}\', \'{password1}\')')
-        cursor.execute(f'insert into public.uzytkownik (login, haslo) values (\'testuser2\', \'testuser2\');')
+        cursor.execute(f'insert into public.uzytkownik (login, haslo) values (\'{username}\', \'{password1}\');')
         conn.commit()
         # result = cursor.fetchall()
         # print('result of insert: ')
@@ -72,7 +74,7 @@ def register(request):
         conn.close()
         request.session['user_login'] = username
         errorMessages.append('successful registration!')
-        return render(request, "register/register.html", context)
+        return redirect('/')
 
     # else:
     #     form = UserCreationForm()

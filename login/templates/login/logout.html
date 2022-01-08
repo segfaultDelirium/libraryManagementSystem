@@ -1,0 +1,28 @@
+{%  extends "library/base.html" %}
+
+{% block title %}
+{% endblock %}
+
+{% block content %}
+    <div class="center-content">
+        <span>{{ message }}</span>
+        <a href="/login/">login</a>
+    </div>
+
+{#    <div class="login-form-container">#}
+{#        <form method="POST" class="form-group login-form" >#}
+{#            {% csrf_token %}#}
+{#            {{ form }}#}
+{#            <button type="submit" class="btn btn-success">Login</button>#}
+{#        </form>#}
+{#        <ul class="error-message-list">#}
+{#            {% for errorMessage in errorMessages %}#}
+{#                <li class="error-message">{{ errorMessage }}</li>#}
+{#            {% endfor %}#}
+{#        </ul>#}
+{#        <a href="../register/">create account</a>#}
+{#    </div>#}
+
+
+
+{% endblock %}
