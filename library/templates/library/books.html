@@ -3,14 +3,41 @@
 {% block content %}
     <div class="main">
         {% include './navbar.html' %}
-        <div>
-            <div >you are viewing books:
-                <span>categories:</span>
-                <ul class="category-list">
-                    {% for category in categories %}
-                        <li>{{ category }}</li>
-                    {% endfor %}
-                </ul>
+        <div class="main-inner">
+            <div>{{ message }}</div>
+            {% if categories %}
+                <div>
+                    <span>kategorie:</span>
+                    <ul class="category-list">
+                        {% for category in categories %}
+                            <li><a href="category/{{ category }}">{{ category }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            <div>
+                {% if booksList %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">id</th>
+                            <th scope="col">Tytul</th>
+                            <th scope="col">cena [zł]</th>
+                            <th scope="col" colspan="2" style="text-align: center">autor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                         {% for book in booksList %}
+                             <tr>
+                                {% for bookDetail in book %}
+                                    <td>{{ bookDetail}}</td>
+                                {%  endfor %}
+                             </tr>
+{#                             <tr></tr>#}
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
             </div>
         </div>
 

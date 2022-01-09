@@ -1,0 +1,59 @@
+{% extends 'library/base.html' %}
+
+{% block content %}
+    <div class="main">
+            {% include 'library/navbar.html' %}
+            <div>
+                {{ message }}
+            </div>
+            <div>
+                dodaj bibliotekarza:
+{#                <form action="/add-librarian/" method="post" class="add-form">#}
+{#                    {% csrf_token %}#}
+{#                    {{ form }}#}
+{#                    <input type="submit" value="dodaj bibliotekarza">#}
+{#                </form>#}
+
+                <form method="post" action="#" >
+                    {% csrf_token %}
+                    <label for="fname">imie</label><br>
+                    <input type="text" id="fname" name="fname"><br>
+                    <label for="lname">nazwisko</label><br>
+                    <input type="text" id="lname" name="lname"><br>
+                    <label for="email">email</label><br>
+                    <input type="text" id="email" name="email"><br>
+                    <label for="telefon">telefon</label><br>
+                    <input type="text" id="telefon" name="telefon"><br>
+                    <label for="login">login</label><br>
+{#                    <input type="text" id="login" name="login"><br>#}
+                    <select id="login" name="login">
+                        {% for login in logins %}
+                            {% for loginContent in login %}
+                                <option value="{{ loginContent }}">{{ loginContent }}</option>
+                            {% endfor %}
+
+                        {% endfor %}
+{#                        <option value="volvo">Volvo XC90</option>#}
+{#                        <option value="saab">Saab 95</option>#}
+{#                        <option value="mercedes">Mercedes SLK</option>#}
+{#                        <option value="audi">Audi TT</option>#}
+                    </select><br>
+                    <label for="adres_id">adres_id</label><br>
+                    <select id="adres_id" name="adres_id">
+                        {% for adres_id in adresy %}
+                            {% for adres_idContent in adres_id %}
+                                <option value="{{ adres_idContent }}">{{ adres_idContent }}</option>
+                            {% endfor %}
+                        {% endfor %}
+
+{#                        <option value="volvo">Volvo XC90</option>#}
+{#                        <option value="saab">Saab 95</option>#}
+{#                        <option value="mercedes">Mercedes SLK</option>#}
+{#                        <option value="audi">Audi TT</option>#}
+                    </select><br>
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
+
+    </div>
+{% endblock content %}

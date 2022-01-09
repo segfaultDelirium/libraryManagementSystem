@@ -1,17 +1,15 @@
 <nav>
     <ul>
-        <li>
-            <a href="/SaveFile/">Uploads</a>
-        </li>
-        <li>
-            <a href="/table/">table</a>
-        </li>
-         <li>
-            <a href="/testing/">testing</a>
-        </li>
-         <li>
-            <a href="/mssql/">mssql</a>
-        </li>
+        {% if isAdmin %}
+            <li>
+                <a href="/add/new-librarian/">dodaj bibliotekarza</a>
+            </li>
+        {% endif %}
+        {% if isLibrarian or isAdmin %}
+            <li>
+                <a href="/add/new-reader/">dodaj czytelnika</a>
+            </li>
+        {% endif %}
         <li>
             <a href="/books/">Książki</a>
         </li>

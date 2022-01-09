@@ -18,13 +18,16 @@ from django.urls import path, include
 
 import register.views
 import login.views
+import addLibrarian.views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('library.urls')),
+    path('index/', include('library.urls')),
     path('register/', register.views.register, name="register"),
     path('login/', login.views.login, name="login"),
     path('logout/', login.views.logout, name="logout"),
+    path('add/', include('addLibrarian.urls'))
     # path('', include('django.contrib.auth.urls')),
 ]
 

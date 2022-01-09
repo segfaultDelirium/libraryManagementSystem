@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'library.apps.LibraryConfig',
     'register.apps.RegisterConfig',
     'login.apps.LoginConfig',
+    'addLibrarian.apps.AddlibrarianConfig',
 ]
 
 MIDDLEWARE = [
