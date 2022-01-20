@@ -1,0 +1,11 @@
+.category-list li {
+  width: 33%;
+  float: left;
+}
+
+.main-inner {
+  width: calc(100vw - 200px);
+  background: #31d2f4;
+}
+
+/*# sourceMappingURL=books.css.map */
