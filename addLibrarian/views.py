@@ -7,23 +7,20 @@ from django.shortcuts import redirect
 from django.http import HttpResponse
 from django.template import loader
 
-from library.commonFunctions import addAdminContextFromSessionUser, addLibrarianContext, addAdminContext, addLibrarianContextFromSessionUser
+from library.commonFunctions import addRolesToContext, isUserLoggedIn, getSessionUser
 
 def addNewLibrarian(request):
     if not isUserLoggedIn(request): return redirect('/')
-    sessionUser = request.session['user_login']
-    context = {'sessionUser': sessionUser}
-    if sessionUser != 'admin':
-        return redirect('/index/')
-    addAdminContextFromSessionUser(sessionUser, context)
-    # form = NameForm()
-    # context['form'] = form
+    context = {}
+    addRolesToContext(request, context)
+    if context['sessionUser'] != 'admin': return redirect('/index/')
     conn = psycopg2.connect(
         host="localhost",
         database="biblioteka",
         user="postgres",
         password="=xBF[q:WN'9.!he(>")
     cursor = conn.cursor()
+
     cursor.execute("""select login from uzytkownik
 full outer join bibliotekarz using(login)
 where bibliotekarz_id is null;""")
@@ -41,13 +38,14 @@ where bibliotekarz_id is null;""")
         telefon = requestData['telefon']
         login = requestData['login']
         adres_id = requestData['adres_id']
-        sqlQuery = f"""
-        insert into bibliotekarz 
+
+        cursor.execute(
+            """prepare plan(text, text, text, text, text, int) as 
+            insert into bibliotekarz 
         (imie, nazwisko, email, telefon, login, adres_id) values 
-        ('{imie}', '{nazwisko}', '{email}', '{telefon}', '{login}', {adres_id} );
-        """
-        print(sqlQuery)
-        cursor.execute(sqlQuery)
+        ($1, $2, $3, $4, $5, $6);""")
+
+        cursor.execute(f"""execute plan ('{imie}', '{nazwisko}', '{email}', '{telefon}', '{login}', '{adres_id}');""")
         conn.commit()
         context['message'] = "pomyslnie dodano bibliotekarza!"
 
@@ -55,31 +53,11 @@ where bibliotekarz_id is null;""")
     template = loader.get_template('addLibrarian/addLibrarian.html')
     return HttpResponse(template.render(context, request))
 
-def isUserLibrarian(sessionUser):
-    conn = psycopg2.connect(
-        host="localhost",
-        database="biblioteka",
-        user="postgres",
-        password="=xBF[q:WN'9.!he(>")
-    cursor = conn.cursor()
-    cursor.execute(f"""select login from bibliotekarz 
-join uzytkownik using(login) 
-where login = '{sessionUser}';""")
-    results = cursor.fetchall()
-    # print(results)
-    conn.close()
-
-
-
 def addNewReader(request):
     if not isUserLoggedIn(request): return redirect('/index/')
-    sessionUser = request.session['user_login']
-    context = {'sessionUser': sessionUser}
-    if not isUserLibrarian(sessionUser) and sessionUser != 'admin': return redirect('/index/')
-    # context = {'sessionUser': sessionUser}
-    if sessionUser != 'admin':
-        return redirect('/index/')
-    context['isAdmin'] = True
+    context = {}
+    addRolesToContext(request, context)
+    if not context['isLibrarian'] and not context['isAdmin']: return redirect('/index/')
     conn = psycopg2.connect(
         host="localhost",
         database="biblioteka",

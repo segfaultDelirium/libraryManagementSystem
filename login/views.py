@@ -6,6 +6,8 @@ import psycopg2
 from django.shortcuts import redirect
 # Create your views here.
 
+from library.commonFunctions import isUserLoggedIn, addRolesToContext, getSessionUser
+
 def logout(request):
     context = {}
     try:
@@ -16,42 +18,50 @@ def logout(request):
     template = loader.get_template('login/logout.html')
     return HttpResponse(template.render(context, request))
 
+def loginAsLibrarianOrReader(request):
+    if not isUserLoggedIn(request): return redirect('/index/')
+    context = {}
+    template = loader.get_template('login/loginAsLibrarianOrReader.html')
+    return HttpResponse(template.render(context, request))
+
+def loginAsReader(request):
+    request.session ["userType"] = '[Czytelnik]'
+    return redirect('/')
+
+def loginAsLibrarian(request):
+    request.session['userType'] = '[Bibliotekarz]'
+    return redirect('/')
+
 def login(request):
     context = {}
     try:
-        sessionUser = request.session['user_login']
-        context['sessionUser'] = sessionUser
-        print('there is a session for user ', sessionUser)
+        context['sessionUser'] = getSessionUser(request)
     except:
-        print('there is no request.session[user_login]')
-    # print(request.session)
-    # print(request.session['user_login'])
+        pass
     form = AuthenticationForm()
     errorMessages: [str] = []
     if request.method == 'POST':
         requestData = request.POST
-        # print(requestData)
         username = requestData.get('username')
         password = requestData.get('password')
-        # print(username)
-        # print(password)
         isValid: bool = True
-        # errMessages: [str] = []
-        # if not isValid:
-        #     return render(request, "register/register.html", context)
-        #
         conn = psycopg2.connect(
             host="localhost",
             database="biblioteka",
             user="postgres",
             password="=xBF[q:WN'9.!he(>")
         cursor = conn.cursor()
-        # TODO check if user exists in the database
-        cursor.execute(f'select * from public.uzytkownik where login = \'{username}\'');
+
+#         """PREPARE fooplan (int, text, bool, numeric) AS
+#     INSERT INTO foo VALUES($1, $2, $3, $4);
+# EXECUTE fooplan(1, 'Hunter Valley', 't', 200.00);"""
+
+        cursor.execute(
+            """prepare plan(text) as 
+            select * from public.uzytkownik where login = $1;""")
+        cursor.execute(f"""execute plan('{username}')""")
         result = cursor.fetchall()
-        print(result)
         if len(result) == 0:
-            print('could not find user in the database!')
             errorMessages.append('could not find user in the database!')
             conn.close()
             context['form'] = form
@@ -60,8 +70,6 @@ def login(request):
             return HttpResponse(template.render(context, request))
         dblogin = result[0][0]
         dbpassword = result[0][1]
-        # print(dblogin)
-        # print(dbpassword)
         if password == dbpassword:
             print('login successful!')
             request.session['user_login'] = username
@@ -78,10 +86,7 @@ def login(request):
             return HttpResponse(template.render(context, request))
         conn.close()
 
-        # return render(request, "register/register.html", context)
-
     context['form'] = form
     context['errorMessages'] = errorMessages
     template = loader.get_template('login/login.html')
     return HttpResponse(template.render(context, request))
-    # return render(request, "login/login.html", context)

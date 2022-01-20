@@ -1,0 +1,32 @@
+{% extends './base.html' %}
+
+{% block content %}
+    <div class="main">
+        {% include './navbar.html' %}
+        <div class="main-inner">
+            <div>{{ message }}</div>
+            <div>
+                Czytelnicy:
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">imie</th>
+                            <th scope="col">nazwisko</th>
+                            <th scope="col">email</th>
+                            <th scope="col">aktywny</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                         {% for reader in readers %}
+                             <tr>
+                                {% for readerDetails in reader %}
+                                    <td>{{readerDetails}}</td>
+                                {%  endfor %}
+                             </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

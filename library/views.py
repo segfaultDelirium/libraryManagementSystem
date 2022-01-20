@@ -6,16 +6,6 @@ from django.shortcuts import redirect
 import psycopg2
 from .commonFunctions import *
 
-# conn = pyodbc.connect('Driver={ODBC Driver 17 for SQL Server};'
-#                               'Server=DESKTOP-D0VHNET;'
-#                               'Database=SQL_tutorial;'
-#                               'UID=admin;PWD=EVEXlD6bggamLr3LXSymLHtF;'
-#                               'Trusted_Connection=yes;', timeout=3)
-
-from addLibrarian.views import addAdminContext, addNewLibrarian, addAdminContextFromSessionUser, addLibrarianContextFromSessionUser
-
-
-
 def index(request):
     if not isUserLoggedIn(request): return redirect('/login/')
     sessionUser = request.session['user_login']
@@ -48,6 +38,42 @@ def viewCoutriesFromDatabase(request):
     template = loader.get_template('library/countries.html')
     return HttpResponse(template.render(context, request))
     # return HttpResponse("viewing countries:")
+
+def viewLibrarians(request):
+    if not isUserLoggedIn(request): return redirect('/login/')
+    context = {}
+    addRolesToContext(request, context)
+    conn = psycopg2.connect(
+        host="localhost",
+        database="biblioteka",
+        user="postgres",
+        password="=xBF[q:WN'9.!he(>")
+    cursor = conn.cursor()
+    cursor.execute("select imie, nazwisko, email, aktywny from public.bibliotekarz;")
+    result = cursor.fetchall()
+    print(result)
+    conn.close()
+    context['librarians'] = result
+    template = loader.get_template('library/show-librarians.html')
+    return HttpResponse(template.render(context, request))
+
+def viewReaders(request):
+    if not isUserLoggedIn(request): return redirect('/login/')
+    context = {}
+    addRolesToContext(request, context)
+    conn = psycopg2.connect(
+        host="localhost",
+        database="biblioteka",
+        user="postgres",
+        password="=xBF[q:WN'9.!he(>")
+    cursor = conn.cursor()
+    cursor.execute("select imie, nazwisko, email, aktywny from public.czytelnik;")
+    result = cursor.fetchall()
+    print(result)
+    conn.close()
+    context['readers'] = result
+    template = loader.get_template('library/show-readers.html')
+    return HttpResponse(template.render(context, request))
 
 
 def books(request):
@@ -95,14 +121,15 @@ def booksInCategory(request, booksCategory):
         context = {'message': f'nie ma takiej kategorii {booksCategory}'}
         template = loader.get_template('library/books.html')
         return HttpResponse(template.render(context, request))
-    # print('there is a book category ', booksCategory)
-    sqlQuery = f"""select ksiazka_id, tytul, cena, imie, nazwisko from ksiazka 
+    cursor.execute(
+        """prepare plan(int) as 
+        select ksiazka_id, tytul, cena, imie, nazwisko from ksiazka 
                 join ksiazka_kategoria using(ksiazka_id)
                 join ksiazka_autor using(ksiazka_id)
                 join autor using(autor_id)
-                where kategoria_id = {categoryid};"""
-    # print(sqlQuery)
-    cursor.execute(sqlQuery)
+                where kategoria_id = $1;""")
+    cursor.execute(f"""execute plan('{categoryid}');""")
+
     booksList = cursor.fetchall()
     conn.close()
     if booksList == []:

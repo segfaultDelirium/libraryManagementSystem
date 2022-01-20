@@ -25,9 +25,9 @@ urlpatterns = [
     path('', include('library.urls')),
     path('index/', include('library.urls')),
     path('register/', register.views.register, name="register"),
-    path('login/', login.views.login, name="login"),
+    path('login/', include('login.urls'), name="login"),
     path('logout/', login.views.logout, name="logout"),
-    path('add/', include('addLibrarian.urls'))
+    path('add/', include('addLibrarian.urls')),
     # path('', include('django.contrib.auth.urls')),
 ]
 
