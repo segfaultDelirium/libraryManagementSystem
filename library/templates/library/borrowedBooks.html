@@ -1,0 +1,43 @@
+{% extends './base.html' %}
+
+{% block content %}
+    <div class="main">
+        {% include './navbar.html' %}
+        <div class="main-inner">
+            <div>{{ message }}</div>
+            <div>
+                {% if booksList %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">data_wypozyczenia</th>
+                            <th scope="col">data_oddania</th>
+                            <th scope="col">tytul</th>
+                            <th scope="col" colspan="1" style="text-align: center">autor</th>
+                            <th scope="col">kategoria</th>
+{#                            {% if isLibrarian or isAdmin %}#}
+{#                                <th scope="col">wypozycz uzytkownikowi</th>#}
+{#                            {% endif %}#}
+                        </tr>
+                    </thead>
+                    <tbody>
+                         {% for book in booksList %}
+                             <tr>
+                                <td>{{ book.data_wypozyczenia }}</td>
+                                <td>{{ book.data_oddania }}</td>
+                                <td>{{ book.tytul }}</td>
+                                <td>{{ book.autor_imie }} {{ book.autor_nazwisko }}</td>
+                                <td>{{ book.kategoria }}</td>
+{#                                <td><a href="/books/{{ book.ksiazka_id }}"><button class="btn btn-primary">wypozycz</button></a></td>#}
+                             </tr>
+{#                             <tr></tr>#}
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+{% endblock content %}

@@ -1,0 +1,25 @@
+{% extends 'library/base.html' %}
+
+{% block content %}
+    <div class="main">
+            {% include 'library/navbar.html' %}
+            <div>
+                <div>
+                    {{ message }}
+                </div><br/>
+                <form method="post" action="#" >
+                    {% csrf_token %}
+                    <label for="czytelnik_id">wybierz czytelnika od ktorego chcesz przyjac ksiazke</label><br>
+                    <select id="czytelnik" name="czytelnik">
+                        {% for czytelnik in czytelnicy %}
+                            <option value="{{ czytelnik.czytelnik_id }}">
+                                id:{{ czytelnik.czytelnik_id }}, {{ czytelnik.imie }} {{ czytelnik.nazwisko }}, login:{{ czytelnik.login }}
+                            </option>
+                        {% endfor %}
+                    </select><br>
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
+
+    </div>
+{% endblock content %}

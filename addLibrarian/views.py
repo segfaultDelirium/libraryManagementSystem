@@ -93,12 +93,6 @@ where czytelnik_id is null;""")
                 ($1, $2, $3, $4, $5, $6);"""
             )
             cursor.execute(f"""execute addReader('{imie}', '{nazwisko}', '{email}', '{telefon}', '{login}', {adres_id});""")
-            # sqlQuery = f"""
-            #         insert into czytelnik
-            #         (imie, nazwisko, email, telefon, login, adres_id) values
-            #         ('{imie}', '{nazwisko}', '{email}', '{telefon}', '{login}', {adres_id} );
-            #         """
-            # cursor.execute(sqlQuery)
             conn.commit()
             context['message'] = "pomyslnie dodano czytelnika!"
 

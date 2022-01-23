@@ -25,6 +25,7 @@
                             <th scope="col">cena [zł]</th>
                             <th scope="col" colspan="1" style="text-align: center">autor</th>
                             {% if isLibrarian or isAdmin %}
+                                <th scope="col">dostepnosc</th>
                                 <th scope="col">wypozycz uzytkownikowi</th>
                             {% endif %}
 
@@ -40,7 +41,22 @@
 {#                                <td>{{ book.nazwisko }}</td>#}
 {#                                <td>{{ book.opis }}</td>#}
 {#                                <td>{{ book.data_wydania }}</td>#}
-                                <td><a href="/books/{{ book.ksiazka_id }}"><button class="btn btn-primary">wypozycz</button></a></td>
+                                 {% if isLibrarian or isAdmin %}
+                                    <th scope="col">
+                                        {% if book.biblioteka_id != 'None' %}
+                                            dostepna
+                                            {% else %}
+                                            niedostepna
+                                        {% endif %}
+                                    </th>
+                                    <td><a href="/books/{{ book.ksiazka_id }}"><button class="btn btn-primary">
+                                        {% if book.biblioteka_id != 'None' %}
+                                            wypozycz
+                                            {% else %}
+                                            szczegoly
+                                        {% endif %}
+                                    </button></a></td>
+                                 {% endif %}
                              </tr>
 {#                             <tr></tr>#}
                         {% endfor %}

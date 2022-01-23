@@ -46,9 +46,9 @@ def jsonFromKeysAndStringList(keys, stringList):
         jsonObj[keys[int(i)]] = v
     return jsonObj
 
-def convertTupleListToStringList(tuple):
+def convertTupleListToStringList(tupleList):
     stringList = []
-    for value in tuple:
+    for value in tupleList:
         valueAsStringList = []
         for val in value:
             valueAsStringList.append(f'{val}')
@@ -61,4 +61,4 @@ def connectToDB():
         database="biblioteka",
         user="postgres",
         password="=xBF[q:WN'9.!he(>")
-    return conn;
+    return conn

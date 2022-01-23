@@ -10,20 +10,28 @@
                 <table class="table">
                     <thead>
                         <tr>
+                            <th scope="col">bibliotekarz_id</th>
                             <th scope="col">imie</th>
                             <th scope="col">nazwisko</th>
                             <th scope="col">email</th>
+                            <th scope="col">telefon</th>
                             <th scope="col">aktywny</th>
+                            <th scope="col">biblioteka_id</th>
+                            <th scope="col">biblioteka miejscowosc</th>
                         </tr>
                     </thead>
                     <tbody>
                          {% for librarian in librarians %}
-                             <tr>
-                                {% for librarianDetail in librarian %}
-                                    <td>{{ librarianDetail}}</td>
-                                {%  endfor %}
-                             </tr>
-{#                             <tr></tr>#}
+                         <tr>
+                             <td>{{librarian.bibliotekarz_id}}</td>
+                             <td>{{librarian.imie}}</td>
+                             <td>{{librarian.nazwisko}}</td>
+                             <td>{{librarian.email}}</td>
+                             <td>{{librarian.telefon}}</td>
+                             <td>{{librarian.aktywny}}</td>
+                             <td>{{librarian.biblioteka_id}}</td>
+                             <td>{{librarian.miejscowosc}}</td>
+                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>

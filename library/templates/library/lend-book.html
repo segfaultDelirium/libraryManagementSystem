@@ -8,11 +8,9 @@
 {% block content %}
     <div class="main">
             {% include 'library/navbar.html' %}
-            <div>
-                {{ message }}
-            </div>
-            <br/>
             <div class="main-inner">
+                {{ message }}
+                <br/>
                 <section>
                     <p>informacje o ksiazce</p>
                     <ul>
@@ -52,10 +50,16 @@
                         <li>
                             <span class="key"> autor </span>
                             <span class="value"> {{ book.imie }} {{ book.nazwisko }}</span>
+                        </li><hr>
+                        <li>
+                            <span class="key"> kategoria </span>
+                            <span class="value">{{ book.kategoria }}</span>
                         </li>
-
                     </ul>
+                    Dostepnosc: {{ availability }}
                 </section>
+{#                {% if %}#}
+                {% if availability != 0 %}
                 wypozycz ksiazke czytelnikowi<br>
                 <form method="post" action="#" >
                     {% csrf_token %}
@@ -69,6 +73,7 @@
                     </select><br>
                     <input type="submit" value="Wypozycz">
                 </form>
+                {% endif %}
             </div>
 
     </div>
