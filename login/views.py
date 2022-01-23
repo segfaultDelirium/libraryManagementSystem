@@ -34,10 +34,6 @@ def loginAsLibrarian(request):
 
 def login(request):
     context = {}
-    try:
-        context['sessionUser'] = getSessionUser(request)
-    except:
-        pass
     form = AuthenticationForm()
     errorMessages: [str] = []
     if request.method == 'POST':
@@ -51,11 +47,9 @@ def login(request):
             user="postgres",
             password="=xBF[q:WN'9.!he(>")
         cursor = conn.cursor()
-
 #         """PREPARE fooplan (int, text, bool, numeric) AS
 #     INSERT INTO foo VALUES($1, $2, $3, $4);
 # EXECUTE fooplan(1, 'Hunter Valley', 't', 200.00);"""
-
         cursor.execute(
             """prepare plan(text) as 
             select * from public.uzytkownik where login = $1;""")
@@ -73,7 +67,7 @@ def login(request):
         if password == dbpassword:
             print('login successful!')
             request.session['user_login'] = username
-            context['sessionUser'] = username
+            # context['sessionUser'] = username
             print(request.session['user_login'])
             return redirect('/')
         else:

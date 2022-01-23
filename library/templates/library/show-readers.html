@@ -10,18 +10,31 @@
                 <table class="table">
                     <thead>
                         <tr>
+                            <th scope="col">id</th>
                             <th scope="col">imie</th>
                             <th scope="col">nazwisko</th>
                             <th scope="col">email</th>
                             <th scope="col">aktywny</th>
+                            {% if isLibrarian or isAdmin %}
+                                <th scope="col">login</th>
+                                <th scope="col">zmien</th>
+                                <th scope="col">usun</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
                          {% for reader in readers %}
                              <tr>
-                                {% for readerDetails in reader %}
-                                    <td>{{readerDetails}}</td>
-                                {%  endfor %}
+                                <td>{{ reader.czytelnik_id }}</td>
+                                <td>{{ reader.imie }}</td>
+                                <td>{{ reader.nazwisko }}</td>
+                                <td>{{ reader.email }}</td>
+                                <td>{{ reader.aktywny }}</td>
+                                {% if isLibrarian or isAdmin %}
+                                    <td>{{ reader.login }}</td>
+                                    <td><button class="btn btn-primary">zmien</button></td>
+                                    <td><a href="/reader/delete/{{ reader.czytelnik_id }}"><button class="btn btn-danger">usun</button></a></td>
+                                {% endif %}
                              </tr>
                         {% endfor %}
                     </tbody>

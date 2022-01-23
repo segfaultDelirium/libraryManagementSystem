@@ -81,15 +81,26 @@ where czytelnik_id is null;""")
         telefon = requestData['telefon']
         login = requestData['login']
         adres_id = requestData['adres_id']
-        sqlQuery = f"""
-                insert into czytelnik 
-                (imie, nazwisko, email, telefon, login, adres_id) values 
-                ('{imie}', '{nazwisko}', '{email}', '{telefon}', '{login}', {adres_id} );
-                """
-        print(sqlQuery)
-        cursor.execute(sqlQuery)
-        conn.commit()
-        context['message'] = "pomyslnie dodano czytelnika!"
+        cursor.execute("""prepare checkIfReaderExist(text) as
+        select login from czytelnik  where login = $1;
+        """)
+        cursor.execute(f"""execute checkIfReaderExist('{login}');""")
+        if cursor.fetchall() != []:
+            context['message'] = "probowano dodaj czytelnika, ktory juz instnieje"
+        else:
+            cursor.execute("""prepare addReader(text, text, text, text, text, int) as
+                insert into czytelnik (imie, nazwisko, email, telefon, login, adres_id) values
+                ($1, $2, $3, $4, $5, $6);"""
+            )
+            cursor.execute(f"""execute addReader('{imie}', '{nazwisko}', '{email}', '{telefon}', '{login}', {adres_id});""")
+            # sqlQuery = f"""
+            #         insert into czytelnik
+            #         (imie, nazwisko, email, telefon, login, adres_id) values
+            #         ('{imie}', '{nazwisko}', '{email}', '{telefon}', '{login}', {adres_id} );
+            #         """
+            # cursor.execute(sqlQuery)
+            conn.commit()
+            context['message'] = "pomyslnie dodano czytelnika!"
 
     conn.close()
     template = loader.get_template('addLibrarian/addReader.html')

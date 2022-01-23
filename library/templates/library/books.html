@@ -23,15 +23,24 @@
                             <th scope="col">id</th>
                             <th scope="col">Tytul</th>
                             <th scope="col">cena [zł]</th>
-                            <th scope="col" colspan="2" style="text-align: center">autor</th>
+                            <th scope="col" colspan="1" style="text-align: center">autor</th>
+                            {% if isLibrarian or isAdmin %}
+                                <th scope="col">wypozycz uzytkownikowi</th>
+                            {% endif %}
+
                         </tr>
                     </thead>
                     <tbody>
                          {% for book in booksList %}
                              <tr>
-                                {% for bookDetail in book %}
-                                    <td>{{ bookDetail}}</td>
-                                {%  endfor %}
+                                <td>{{ book.ksiazka_id }}</td>
+                                <td>{{ book.tytul }}</td>
+                                <td>{{ book.cena }}</td>
+                                <td>{{ book.imie }} {{ book.nazwisko }}</td>
+{#                                <td>{{ book.nazwisko }}</td>#}
+{#                                <td>{{ book.opis }}</td>#}
+{#                                <td>{{ book.data_wydania }}</td>#}
+                                <td><a href="/books/{{ book.ksiazka_id }}"><button class="btn btn-primary">wypozycz</button></a></td>
                              </tr>
 {#                             <tr></tr>#}
                         {% endfor %}

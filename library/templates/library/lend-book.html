@@ -1,0 +1,75 @@
+{% extends 'library/base.html' %}
+{% load static %}
+
+{% block styles %}
+        <link rel="stylesheet" href="{% static 'css/lendBook.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="main">
+            {% include 'library/navbar.html' %}
+            <div>
+                {{ message }}
+            </div>
+            <br/>
+            <div class="main-inner">
+                <section>
+                    <p>informacje o ksiazce</p>
+                    <ul>
+                        <li>
+                            <span class="key"> ksiazka_id</span>
+                            <span class="value"> {{ book.ksiazka_id }}</span>
+                        </li>
+                        <hr>
+                        <li>
+                            <span class="key"> tytul</span>
+                            <span class="value"> {{ book.tytul }}</span>
+                        </li><hr>
+                        <li>
+                            <span class="key"> opis</span>
+                            <span class="value"> {{ book.opis }}</span>
+                        </li><hr>
+                        <li>
+                            <span class="key"> data_wydania</span>
+                            <span class="value"> {{ book.data_wydania }}</span>
+                        </li><hr>
+                        <li>
+                            <span class="key"> czas_wypozyczenia_dni</span>
+                            <span class="value"> {{ book.czas_wypozyczenia_dni }}</span>
+                        </li><hr>
+                        <li>
+                            <span class="key"> ilosc_stron</span>
+                            <span class="value"> {{ book.ilosc_stron }}</span>
+                        </li><hr>
+                        <li>
+                            <span class="key"> cena [zl]</span>
+                            <span class="value"> {{ book.cena }}</span>
+                        </li><hr>
+                        <li>
+                            <span class="key"> ocena</span>
+                            <span class="value"> {{ book.ocena }}</span>
+                        </li><hr>
+                        <li>
+                            <span class="key"> autor </span>
+                            <span class="value"> {{ book.imie }} {{ book.nazwisko }}</span>
+                        </li>
+
+                    </ul>
+                </section>
+                wypozycz ksiazke czytelnikowi<br>
+                <form method="post" action="#" >
+                    {% csrf_token %}
+                    <label for="czytelnik_id">czytelnik_id</label><br>
+                    <select id="czytelnik_id" name="czytelnik_id">
+                        {% for czytelnik in czytelnicy %}
+                            <option value="{{ czytelnik.czytelnik_id }}">
+                                id:{{ czytelnik.czytelnik_id }}, {{ czytelnik.imie }} {{ czytelnik.nazwisko }}, login:{{ czytelnik.login }}
+                            </option>
+                        {% endfor %}
+                    </select><br>
+                    <input type="submit" value="Wypozycz">
+                </form>
+            </div>
+
+    </div>
+{% endblock content %}
