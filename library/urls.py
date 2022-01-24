@@ -13,5 +13,5 @@ urlpatterns = [
     path('books/<int:book_id>/', views.lendBook, name='lend-book'),
     path('books/user-borrowed/', views.viewBorrowedBooks, name='user-borrowed-books'),
     path('books/accept-returned-book/', views.acceptReturnedBook, name='accept-returned-book'),
-    path('books/accept-returned-book/<int:inwentarz_id>/', views.acceptReturnedBook_checkFee, name='accept-returned-book-check-fee'),
+    path('books/accept-returned-book/<int:wypozyczenie_id>/', views.acceptReturnedBook_checkFee, name='accept-returned-book-check-fee'),
 ]

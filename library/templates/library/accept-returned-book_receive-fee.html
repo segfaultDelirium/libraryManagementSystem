@@ -6,14 +6,22 @@
         <div class="main-inner">
             <div>{{ message }}</div>
             <div>
-                {% if fee %}
-                <div>
-                    fee: {{ fee }} zl
-                </div>
-                <a href="/">
-                    <button class="btn btn-primary">Przyjmij oplate</button>
-                </a>
+                {% if status %}
+                    pomyslnie przyjeto ksiazke
+                {% else %}
+                    {% if fee %}
+                        <div>
+                            fee: {{ fee }} zl
+                        </div>
+                        <form action="/books/accept-returned-book/{{ wypozyczenie_id }}/" method="post">
+                            {% csrf_token %}
+                          <input type="submit" value="Przyjmij oplate">
+                        </form>
+                    {% else %}
+                        <div> brak oplaty, zwrot przed deadlinem</div>
+                    {% endif %}
                 {% endif %}
+
             </div>
         </div>
 

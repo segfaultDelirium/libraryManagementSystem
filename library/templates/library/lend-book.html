@@ -56,10 +56,10 @@
                             <span class="value">{{ book.kategoria }}</span>
                         </li>
                     </ul>
-                    Dostepnosc: {{ availability }}
+                    Dostepna: {{ available }}
                 </section>
 {#                {% if %}#}
-                {% if availability != 0 %}
+                {% if available %}
                 wypozycz ksiazke czytelnikowi<br>
                 <form method="post" action="#" >
                     {% csrf_token %}

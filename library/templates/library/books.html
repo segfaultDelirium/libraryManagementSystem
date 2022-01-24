@@ -7,10 +7,10 @@
             <div>{{ message }}</div>
             {% if categories %}
                 <div>
-                    <span>kategorie:</span>
+                    <span>kategorie i ilosc ksiazek w danej kategorii:</span>
                     <ul class="category-list">
                         {% for category in categories %}
-                            <li><a href="category/{{ category }}">{{ category }}</a></li>
+                            <li><a href="category/{{ category.category_name }}">{{ category.category_name }}, {{ category.book_amount }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -43,14 +43,15 @@
 {#                                <td>{{ book.data_wydania }}</td>#}
                                  {% if isLibrarian or isAdmin %}
                                     <th scope="col">
-                                        {% if book.biblioteka_id != 'None' %}
-                                            dostepna
-                                            {% else %}
+                                        {% if book.niedostepna == '1' %}
                                             niedostepna
+                                        {% else %}
+                                            dostepna
                                         {% endif %}
+
                                     </th>
                                     <td><a href="/books/{{ book.ksiazka_id }}"><button class="btn btn-primary">
-                                        {% if book.biblioteka_id != 'None' %}
+                                        {% if book.biblioteka_id != 'None' and book.niedostepna != '1' %}
                                             wypozycz
                                             {% else %}
                                             szczegoly

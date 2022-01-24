@@ -98,11 +98,10 @@ def books(request):
     addRolesToContext(request, context)
     conn = connectToDB()
     cursor = conn.cursor()
-    cursor.execute("select kategoria from public.kategoria")
+    cursor.execute("select kategoria, count(ksiazka_id) as amount from kategoria join ksiazka_kategoria using(kategoria_id) join ksiazka using(ksiazka_id) group by kategoria_id order by kategoria")
     result = cursor.fetchall()
     print(result)
-    categories = [row[0] for row in result]
-    categories.sort()
+    categories = [{'category_name': row[0], 'book_amount': row[1] } for row in result]
     print(categories)
     conn.close()
     context['categories'] = categories
@@ -145,16 +144,12 @@ def getBooksAsJson(category_id):
     cursor = conn.cursor()
     cursor.execute(
         """prepare plan(int) as 
-        select ksiazka_id, tytul, opis, data_wydania, czas_wypozyczenia_dni, ilosc_stron, cena, ocena, imie, nazwisko, biblioteka_id from ksiazka 
-                join ksiazka_kategoria using(ksiazka_id)
-                join ksiazka_autor using(ksiazka_id)
-                join autor using(autor_id)
-                full outer join inwentarz using(ksiazka_id)
+        select * from ksiazkaInfo
                 where kategoria_id = $1;""")
     cursor.execute(f"""execute plan('{category_id}');""")
     values = cursor.fetchall()
     valuesAsStringLists = convertTupleListToStringList(values)
-    keys = ['ksiazka_id', 'tytul', 'opis', 'data_wydania', 'czas_wypozyczenia_dni', 'ilosc_stron', 'cena', 'ocena',
+    keys = [ 'niedostepna', 'kategoria_id', 'ksiazka_id', 'tytul', 'opis', 'data_wydania', 'czas_wypozyczenia_dni', 'ilosc_stron', 'cena', 'ocena',
             'imie', 'nazwisko', 'biblioteka_id']
     jsonObj = jsonFromKeysAndStringLists(keys, valuesAsStringLists)
     conn.close()
@@ -256,9 +251,15 @@ def lendBook(request, book_id):
         cursor = conn.cursor()
         biblioteka_id = getBiliotekaIdFromLogin(context['sessionUser'])
         cursor.execute(
-            f"""prepare isBookInLibrary(int, int) as select count(*) from inwentarz where ksiazka_id = $1 and biblioteka_id = $2;""")
+            f"""prepare isBookInLibrary(int, int) as 
+            select count(*) from wypozyczenie 
+            join inwentarz using(inwentarz_id)
+            join ksiazka using(ksiazka_id)
+            where ksiazka_id = $1 and data_oddania is null and biblioteka_id = $2;""")
+        # cursor.execute(
+        #     f"""prepare isBookInLibrary(int, int) as select count(*) from inwentarz where ksiazka_id = $1 and biblioteka_id = $2;""")
         cursor.execute(f"""execute isBookInLibrary('{book_id}', '{biblioteka_id}');""")
-        context['availability'] = cursor.fetchone()[0]
+        context['available'] = cursor.fetchone()[0] == 0
         context['book'] = getBookDetails(book_id)
         keys = ['czytelnik_id', 'imie', 'nazwisko', 'email', 'login']
         cursor.execute("""select czytelnik_id, imie, nazwisko, email, login from czytelnik where aktywny = true""")
@@ -314,22 +315,33 @@ def acceptReturnedBook_chooseBook(request):
     conn = connectToDB()
     cursor = conn.cursor()
     cursor.execute(f"""
-            select inwentarz_id, data_wypozyczenia, data_oddania, tytul, autor.imie, autor.nazwisko, kategoria  from wypozyczenie
+            select wypozyczenie_id, inwentarz_id, data_wypozyczenia, data_oddania, tytul, autor.imie, autor.nazwisko, kategoria  from wypozyczenie
             join inwentarz using(inwentarz_id)
             join ksiazka using(ksiazka_id)
             join ksiazka_autor using(ksiazka_id)
             join autor using(autor_id)
             join ksiazka_kategoria using(ksiazka_id)
             join kategoria using(kategoria_id)
-            where czytelnik_id = '{czytelnik_id[0]}';
+            where czytelnik_id = '{czytelnik_id[0]}' and data_oddania is null;
         """)
     values = cursor.fetchall()
     valuesAsStringLists = convertTupleListToStringList(values)
-    keys = ['inwentarz_id', 'data_wypozyczenia', 'data_oddania', 'tytul', 'autor_imie', 'autor_nazwisko', 'kategoria']
+    keys = [ 'wypozyczenie_id', 'inwentarz_id', 'data_wypozyczenia', 'data_oddania', 'tytul', 'autor_imie', 'autor_nazwisko', 'kategoria']
     jsonObj = jsonFromKeysAndStringLists(keys, valuesAsStringLists)
     print(jsonObj)
     conn.close()
     return jsonObj
+
+def getCzytelnikInfo(czytelnik_id):
+    conn = connectToDB()
+    cursor = conn.cursor()
+    cursor.execute("""prepare plan(int) as
+    select czytelnik_id, imie, nazwisko, email, telefon from czytelnik where czytelnik_id = $1;""")
+    cursor.execute(f"execute plan({czytelnik_id})")
+    keys = ['czytelnik_id', 'imie', 'nazwisko', 'email', 'telefon']
+    czytelnikData = jsonFromKeysAndStringList(keys, cursor.fetchone())
+    conn.close()
+    return czytelnikData
 
 def acceptReturnedBook(request):
     if not isUserLoggedIn(request): return redirect('/login/')
@@ -337,7 +349,8 @@ def acceptReturnedBook(request):
     addRolesToContext(request, context)
     if not context['isLibrarian'] and not context['isAdmin']: return redirect('/index/')
     if request.method == "POST":
-        print('in post ')
+        czytelnik_id = request.POST['czytelnik']
+        context['czytelnik'] = getCzytelnikInfo(czytelnik_id)
         context["booksList"] = acceptReturnedBook_chooseBook(request)
         template = loader.get_template('library/accept-returned-book_choose_book.html')
         return HttpResponse(template.render(context, request))
@@ -352,47 +365,82 @@ def acceptReturnedBook(request):
     template = loader.get_template('library/accept-returned-book_choose_reader.html')
     return HttpResponse(template.render(context, request))
 
-def acceptReturnedBook_checkFee(request, inwentarz_id):
+def acceptReturnedBook_checkFee(request, wypozyczenie_id):
     if not isUserLoggedIn(request): return redirect('/login/')
     context = {}
     addRolesToContext(request, context)
     if not context['isLibrarian'] and not context['isAdmin']: return redirect('/index/')
-
     conn = connectToDB()
     cursor = conn.cursor()
-    keys = ['czytelnik_id', 'imie', 'nazwisko', 'email', 'login']
     cursor.execute(
         f"""prepare getDataWypozyczenia(int) as 
-        select data_wypozyczenia, current_date from wypozyczenie join inwentarz using(inwentarz_id)
-        where inwentarz_id = $1;""")
-    cursor.execute(f"""execute getDataWypozyczenia('{inwentarz_id}');""")
+            select data_wypozyczenia, current_date from wypozyczenie where wypozyczenie_id = $1;""")
+    cursor.execute(f"""execute getDataWypozyczenia('{wypozyczenie_id}');""")
     result = cursor.fetchone()
-    # borrowDate = result[0]
-    borrowDate = datetime.date(2022, 1, 20)
+    borrowDate = result[0]
     returnDate = result[1]
     print(f'{borrowDate=}, {returnDate=}')
     days = (returnDate - borrowDate).days
-
     cursor.execute("""prepare getCzasWypozyczenia_dni(int) as 
-    select czas_wypozyczenia_dni from ksiazka join inwentarz using(ksiazka_id) where inwentarz_id = $1;
-    """)
-    cursor.execute(f"execute getCzasWypozyczenia_dni('{inwentarz_id}')")
-    maxborrowDays= cursor.fetchone()[0]
+        select czas_wypozyczenia_dni from wypozyczenie join inwentarz using(inwentarz_id) join ksiazka using(ksiazka_id)
+    where wypozyczenie_id = $1
+        """)
+    cursor.execute(f"execute getCzasWypozyczenia_dni('{wypozyczenie_id}')")
+    maxborrowDays = cursor.fetchone()[0]
 
-    conn.close()
+    if request.method == "POST":
+        cursor.execute(f"""prepare getCzytelnikId(int) as
+        select czytelnik_id, current_date from wypozyczenie where wypozyczenie_id = $1
+        """)
+        cursor.execute(f"execute getCzytelnikId({wypozyczenie_id});")
+        czytelnik_and_date = cursor.fetchone()
+        czytelnik_id = czytelnik_and_date[0]
+        data_zaplaty = czytelnik_and_date[1]
+        print(czytelnik_id)
+        print(data_zaplaty)
+        bibliotekarz_id = getBibliotekarzId(context['sessionUser'])
+        print(bibliotekarz_id)
+
+        oplata = calculateBorrowFee(days - maxborrowDays)
+        cursor.execute(f""" prepare addOplata(int, int, int, numeric, date) as
+        insert into oplata (czytelnik_id, bibliotekarz_id, wypozyczenie_id, oplata, data_zaplaty) values
+        ($1, $2, $3, $4, $5);""")
+        cursor.execute(f"execute addOplata({czytelnik_id}, {bibliotekarz_id}, {wypozyczenie_id}, {oplata}, '{data_zaplaty}')")
+        conn.commit()
+
+        cursor.execute(f"""prepare acceptBook(int) as
+            update wypozyczenie
+            set data_oddania = '{returnDate}' where wypozyczenie_id = $1;
+            """)
+        cursor.execute(f"execute acceptBook({wypozyczenie_id});")
+        conn.commit()
+        conn.close()
+        context['status'] = "received"
+        template = loader.get_template('library/accept-returned-book_receive-fee.html')
+        return HttpResponse(template.render(context, request))
+
+    context['wypozyczenie_id'] = wypozyczenie_id
     if days > maxborrowDays:
+        conn.close()
         context['fee'] = calculateBorrowFee(days - maxborrowDays)
         template = loader.get_template('library/accept-returned-book_receive-fee.html')
         return HttpResponse(template.render(context, request))
+    sqlText = f"""prepare acceptBook(int) as
+    update wypozyczenie 
+    set data_oddania = '{returnDate}' where wypozyczenie_id = $1;
+    """
+    print(sqlText)
+    print(wypozyczenie_id)
+    cursor.execute(f"""prepare acceptBook(int) as
+    update wypozyczenie 
+    set data_oddania = '{returnDate}' where wypozyczenie_id = $1;
+    """)
+    cursor.execute(f"execute acceptBook({wypozyczenie_id});")
+    conn.commit()
+    conn.close()
     context['message'] = "pomyslnie przyjeto ksiazke"
-    # template = loader.get_template('library/index.html')
-    # return HttpResponse(template.render(context, request))
     template = loader.get_template('library/accept-returned-book_receive-fee.html')
     return HttpResponse(template.render(context, request))
-
-
-
-
 
 def calculateBorrowFee(daysOverDeadline):
     return daysOverDeadline * 0.3

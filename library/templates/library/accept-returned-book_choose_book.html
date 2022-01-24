@@ -6,6 +6,7 @@
         <div class="main-inner">
             <div>{{ message }}</div>
             <div>
+                przegladasz ksiazki czytelnika: {{ czytelnik.imie }} {{ czytelnik.nazwisko }}, email: {{ czytelnik.email }}
                 {% if booksList %}
                 <table class="table">
                     <thead>
@@ -30,7 +31,7 @@
                                 <td>{{ book.tytul }}</td>
                                 <td>{{ book.autor_imie }} {{ book.autor_nazwisko }}</td>
                                 <td>{{ book.kategoria }}</td>
-                                <td><a href="/books/accept-returned-book/{{ book.inwentarz_id }}"><button class="btn btn-primary">przyjmij</button></a></td>
+                                <td><a href="/books/accept-returned-book/{{ book.wypozyczenie_id }}"><button class="btn btn-primary">przyjmij</button></a></td>
                              </tr>
                         {% endfor %}
                     </tbody>
