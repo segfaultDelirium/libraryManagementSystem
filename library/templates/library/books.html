@@ -51,7 +51,7 @@
 
                                     </th>
                                     <td><a href="/books/{{ book.ksiazka_id }}"><button class="btn btn-primary">
-                                        {% if book.biblioteka_id != 'None' and book.niedostepna != '1' %}
+                                        {% if book.niedostepna != '1' %}
                                             wypozycz
                                             {% else %}
                                             szczegoly
